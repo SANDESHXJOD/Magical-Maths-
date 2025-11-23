@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Football Themed Calculator</title>
+<style>
+  :root{
+    --bg:#071028; --card:#0f1724; --accent:#f59e0b; --muted:#9aa4b2;
+  }
+  *{box-sizing:border-box;font-family:Inter,Arial,Helvetica,sans-serif}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#041022,#071028);color:#fff}
+  .app{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;
+    position:relative;overflow:hidden;
+  }
+
+  /* floating flags (emoji demo) */
+  .flags{position:absolute;inset:0;pointer-events:none}
+  .flag{position:absolute;font-size:30px;opacity:0.95}
+  .flag.f1{left:6%;top:12%;animation:floatA 18s linear infinite}
+  .flag.f2{left:22%;top:75%;animation:floatB 22s linear infinite}
+  .flag.f3{left:40%;top:28%;animation:floatC 20s linear infinite}
+  .flag.f4{left:74%;top:18%;animation:floatA 24s linear infinite}
+  .flag.f5{left:58%;top:60%;animation:floatB 26s linear infinite}
+  @keyframes floatA{0%{transform:translateY(0)}50%{transform:translateY(-28px)}100%{transform:translateY(0)}}
+  @keyframes floatB{0%{transform:translateY(0)}50%{transform:translateY(36px)}100%{transform:translateY(0)}}
+  @keyframes floatC{0%{transform:translateY(0)}50%{transform:translateY(-16px)}100%{transform:translateY(0)}}
+
+  .card{
+    width:400px;max-width:94%;background:rgba(255,255,255,0.03);
+    border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6);z-index:2;
+    backdrop-filter:blur(6px);
+  }
+  .display{
+    height:64px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);
+    display:flex;align-items:center;justify-content:flex-end;padding:10px 14px;font-size:28px;margin-bottom:12px;color:var(--accent);
+    overflow:hidden;word-break:break-all;
+  }
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  button{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);
+    padding:14px;border-radius:10px;font-size:18px;cursor:pointer;position:relative;overflow:visible;color:#fff}
+  button:active{transform:translateY(2px)}
+  .btnInner{display:flex;flex-direction:column;align-items:center}
+  .numText{font-weight:700;font-size:20px}
+  .player{font-size:11px;margin-top:6px;opacity:0.95}
+  .zero{grid-column:1/span 2}
+  .equals{grid-column:3/span 1;background:linear-gradient(90deg,var(--accent),#e67e22);color:#06111a}
+  .clear{grid-column:4/span1;background:transparent;border:1px solid rgba(255,50,50,0.2);color:#ff8b8b}
+  .op{background:rgba(255,255,255,0.02);font-weight:700}
+
+  .legend{margin-top:10px;color:var(--muted);font-size:12px;text-align:center}
+
+  /* 1..9 animations and colors */
+  .n1 .player{animation:glow 3s ease-in-out infinite;color:#7ee7ff}
+  .n2 .player{animation:spinTilt 2.8s linear infinite;color:#ffd57e}
+  .n3 .player{animation:zoomBounce 2.6s ease-in-out infinite;color:#c4ffb1}
+  .n4 .player{animation:shake 1.6s linear infinite;color:#ffb3d6}
+  .n5 .player{animation:wave 2.4s ease-in-out infinite;color:#d6c3ff}
+  .n6 .player{animation:floatAndFade 3.2s ease-in-out infinite;color:#f0f0a6}
+  .n7 .player{animation:spin 2.2s linear infinite;color:#ffd1a6}
+  .n8 .player{animation:flip 2s ease-in-out infinite;color:#a6d8ff}
+  .n9 .player{animation:borderPulse 3s ease-in-out infinite;color:#ffe7a6}
+
+  @keyframes glow{0%{text-shadow:0 0 2px rgba(126,231,255,0.6)}50%{text-shadow:0 0 10px rgba(126,231,255,0.95)}100%{text-shadow:0 0 2px rgba(126,231,255,0.6)}}
+  @keyframes spinTilt{0%{transform:rotate(0)}50%{transform:rotate(12deg) translateY(-6px)}100%{transform:rotate(0)}}
+  @keyframes zoomBounce{0%{transform:scale(1)}40%{transform:scale(1.12)}60%{transform:scale(0.98)}100%{transform:scale(1)}}
+  @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-4px)}100%{transform:translateX(0)}}
+  @keyframes wave{0%{transform:translateY(0)}50%{transform:translateY(-6px) skewX(6deg)}100%{transform:translateY(0)}}
+  @keyframes floatAndFade{0%{opacity:1;transform:translateY(0)}50%{opacity:0.8;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}
+  @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+  @keyframes flip{0%{transform:rotateX(0)}50%{transform:rotateX(180deg)}100%{transform:rotateX(360deg)}}
+  @keyframes borderPulse{0%{box-shadow:0 0 0 rgba(255,215,150,0)}50%{box-shadow:0 0 10px rgba(255,215,150,0.45)}100%{box-shadow:0 0 0 rgba(255,215,150,0)}}
+
+  .op{animation:operatorPulse 3s ease-in-out infinite}
+  @keyframes operatorPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+  @media (max-width:420px){
+    .card{padding:12px}.display{font-size:20px;height:56px}.btn{padding:10px}
+  }
+
+  /* small helper for title */
+  .title{font-size:14px;color:var(--muted);text-align:center;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="flags" aria-hidden>
+    <span class="flag f1">🇧🇷</span>
+    <span class="flag f2">🇫🇷</span>
+    <span class="flag f3">🇦🇷</span>
+    <span class="flag f4">🇪🇸</span>
+    <span class="flag f5">🇵🇹</span>
+  </div>
+
+  <div class="card" role="application" aria-label="Football themed calculator">
+    <div class="title">Football Animated Calculator — Numbers show players</div>
+    <div id="display" class="display">0</div>
+
+    <div class="grid" id="grid">
+      <!-- row 1 -->
+      <button class="n7" data-val="7"><div class="btnInner"><div class="numText">7</div><div class="player">Cristiano Ronaldo</div></div></button>
+      <button class="n8" data-val="8"><div class="btnInner"><div class="numText">8</div><div class="player">Andrés Iniesta</div></div></button>
+      <button class="n9" data-val="9"><div class="btnInner"><div class="numText">9</div><div class="player">Ronaldo Nazário</div></div></button>
+      <button class="op" data-val="/">÷</button>
+
+      <!-- row 2 -->
+      <button class="n4" data-val="4"><div class="btnInner"><div class="numText">4</div><div class="player">Sergio Ramos</div></div></button>
+      <button class="n5" data-val="5"><div class="btnInner"><div class="numText">5</div><div class="player">Zinedine Zidane</div></div></button>
+      <button class="n6" data-val="6"><div class="btnInner"><div class="numText">6</div><div class="player">Franco Baresi</div></div></button>
+      <button class="op" data-val="*">×</button>
+
+      <!-- row 3 -->
+      <button class="n1" data-val="1"><div class="btnInner"><div class="numText">1</div><div class="player">Lev Yashin</div></div></button>
+      <button class="n2" data-val="2"><div class="btnInner"><div class="numText">2</div><div class="player">Charles Woodson</div></div></button>
+      <button class="n3" data-val="3"><div class="btnInner"><div class="numText">3</div><div class="player">Paolo Maldini</div></div></button>
+      <button class="op" data-val="-">−</button>
+
+      <!-- row 4 -->
+      <button class="zero" data-val="0"><div class="btnInner"><div class="numText">0</div></div></button>
+      <button data-val="."><div class="btnInner"><div class="numText">.</div></div></button>
+      <button class="equals" data-val="="><div class="btnInner"><div class="numText">=</div></div></button>
+      <button class="op" data-val="+">+</button>
+
+      <!-- clear -->
+      <button class="clear" data-val="C">C</button>
+    </div>
+
+    <div class="legend">Tip: click numbers to type. For better animations replace player divs with GIFs or Lottie (future step).</div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const display = document.getElementById('display');
+    let expr = '';
+
+    // safe input characters allowed
+    const allowedPattern = /^[0-9+\-*/().\\s]*$/;
+
+    function updateDisplay(){
+      display.textContent = expr || '0';
+    }
+
+    function safeEval(input){
+      // sanitize: remove any character not allowed
+      const clean = String(input).replace(/[^0-9+\\-*/(). ]/g, '');
+      if (!allowedPattern.test(clean)) throw new Error('Invalid expression');
+      // prevent consecutive operator like ** or //
+      if (/\\*\\*|\\/\\/|\\+\\+|--|\\+\\-|\\-\\+/.test(clean)){}
+      // evaluate using Function (safer than eval in this small demo)
+      try {
+        // eslint-disable-next-line no-new-func
+        const fn = new Function('return (' + clean + ')');
+        const r = fn();
+        if (typeof r === 'number' && isFinite(r)) return r;
+        throw new Error('Result not finite');
+      } catch(e){
+        throw e;
+      }
+    }
+
+    document.getElementById('grid').addEventListener('click', function(ev){
+      const btn = ev.target.closest('button');
+      if (!btn) return;
+      const v = btn.dataset.val;
+      if (!v) return;
+      if (v === 'C'){
+        expr = '';
+        updateDisplay();
+        return;
+      }
+      if (v === '='){
+        try {
+          const res = safeEval(expr);
+          expr = String(res);
+          updateDisplay();
+        } catch(e){
+          expr = '';
+          display.textContent = 'Error';
+          setTimeout(updateDisplay, 900);
+        }
+        return;
+      }
+      // append (for operators ensure spacing for readability)
+      if (['+','-','*','/'].includes(v)){
+        expr += ' ' + v + ' ';
+      } else {
+        expr += v;
+      }
+      updateDisplay();
+    });
+
+    // keyboard support
+    window.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('[data-val="="]').click();
+        return;
+      }
+      if (e.key === 'Backspace'){
+        expr = expr.slice(0,-1);
+        updateDisplay();
+        return;
+      }
+      const k = e.key;
+      if ((/^[0-9]$/).test(k) || k === '.' ){
+        expr += k; updateDisplay(); return;
+      }
+      if (k === '+'||k==='-'||k==='*'||k==='/'||k==='('||k===')'){
+        expr += k; updateDisplay(); return;
+      }
+    });
+
+    // small accessibility: announce player name when number clicked (aria-live would be better)
+    document.querySelectorAll('[data-val]').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const playerEl = b.querySelector('.player');
+        if (playerEl) {
+          // small visual pulse to show the player name
+          playerEl.style.transform = 'scale(1.05)';
+          setTimeout(()=>playerEl.style.transform = '',200);
+        }
+      });
+    });
+
+    updateDisplay();
+  })();
+</script>
+</body>
+</html>
